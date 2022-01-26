@@ -7,7 +7,10 @@
 # |           ----
 # |              |
 # |---------------
-
+# Two buttons connected to the GPIO 24 & 23. 
+# Screen displayes the stats
+# When Reboot button is pressed for more than 5 seconds, system reboots
+# When Reset button is pressed for more than 5 seconds, system Shuts down
 
 import time
 import subprocess
@@ -15,8 +18,6 @@ import digitalio
 import board
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_rgb_display.st7789 as st7789
-
-
 import time
 import RPi.GPIO as GPIO #Python Package Reference: https://pypi.org/project/RPi.GPIO/
 
@@ -26,18 +27,19 @@ reboot_pin = 23
 
 # Suppress warnings
 GPIO.setwarnings(False)
-
 # Use "GPIO" pin numbering
 GPIO.setmode(GPIO.BCM)
+# Use pullup resistor so that the pin is not floating
+GPIO.setup(shutdown_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(reboot_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
 
 # Configuration for CS and DC pins (these are FeatherWing defaults on M0/M4):
 cs_pin = digitalio.DigitalInOut(board.CE0)
 dc_pin = digitalio.DigitalInOut(board.D25)
 reset_pin = None
-
 # Config for display baudrate (default max is 24mhz):
 BAUDRATE = 64000000
-
 # Setup SPI bus using hardware SPI:
 spi = board.SPI()
 
@@ -86,11 +88,7 @@ backlight = digitalio.DigitalInOut(board.D22)
 backlight.switch_to_output()
 backlight.value = True
 
-
-# Use Qwiic pHAT's pullup resistor so that the pin is not floating
-GPIO.setup(shutdown_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(reboot_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
+# Function restarts teh Raspberr PI
 def restart():
     print("restarting Pi")
     command = "/usr/bin/sudo /sbin/shutdown -r now"
@@ -99,7 +97,7 @@ def restart():
     output = process.communicate()[0]
     print(output)
 
-# modular function to shutdown Pi
+# function to shutdown Pi
 def shut_down():
     print("shutting down")
     command = "/usr/bin/sudo /sbin/shutdown -h now"
@@ -108,12 +106,11 @@ def shut_down():
     output = process.communicate()[0]
     print(output)
 
+# Print the Stats or any other info
 def print_info():
     # Draw a black filled box to clear the image.
     draw.rectangle((0, 0, width, height), outline=0, fill=0)
 
-    # Shell scripts for system monitoring from here:
-    # https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
     cmd = "hostname -I | cut -d' ' -f1"
     IP = "IP: " + subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
@@ -149,31 +146,29 @@ def print_shutdown_reboot(caption):
 
 
 while True:
-
-    # wait for a button press with switch debounce on the falling edge so that this script
-    # is not taking up too many resources in order to shutdown the Pi safely
-#    channel_s = GPIO.wait_for_edge(shutdown_pin, GPIO.FALLING, bouncetime=200)
-#    channel_r = GPIO.wait_for_edge(reboot_pin, GPIO.FALLING, bouncetime=200)
-
+    
+    # Check the buttons value if LOW or HIGH
     bs = GPIO.input(shutdown_pin)
     br = GPIO.input(reboot_pin)
 #    print(bs,br)
-
+    
+    # If Shutdown button is pressed
     if bs == GPIO.LOW:
         counter = 0
+        # Keep checking for 5 seconds
         while GPIO.input(shutdown_pin) == GPIO.LOW:
             counter += 1
             time.sleep(0.5)
-            #print("Pressed...", str(counter))
             msg = "Shutdown ? " + str(counter)
             print_shutdown_reboot(msg)
             if counter > 5:
                 print_shutdown_reboot("Shutdown now...")
                 shut_down()
 
-       # shut_down()
+    # shut_down()
     if br == GPIO.LOW:
         counter = 0
+        # Keep checking for 5 seconds
         while GPIO.input(reboot_pin) == GPIO.LOW:
             counter += 1
             time.sleep(0.5)
@@ -182,6 +177,8 @@ while True:
             if counter > 5:
                 print_shutdown_reboot("Rebooting now...")
                 restart()
+
+    # If none of the buttons are pressed then display the stats
     if bs == GPIO.HIGH:
         if br == GPIO.HIGH:
             print_info()
