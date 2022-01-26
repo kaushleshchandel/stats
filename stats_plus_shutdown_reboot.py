@@ -111,6 +111,8 @@ def print_info():
     # Draw a black filled box to clear the image.
     draw.rectangle((0, 0, width, height), outline=0, fill=0)
 
+    # Shell scripts for system monitoring from here:
+    # https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
     cmd = "hostname -I | cut -d' ' -f1"
     IP = "IP: " + subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
@@ -120,6 +122,7 @@ def print_info():
     cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %d/%d GB  %s", $3,$2,$5}\''
     Disk = subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = "cat /sys/class/thermal/thermal_zone0/temp |  awk '{printf \"CPU Temp: %.1f C\", $(NF-0) / 1000}'"  # pylin>    Temp = subprocess.check_output(cmd, shell=True).decode("utf-8")
+    Temp = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
     # Write four lines of text.
     y = top
@@ -131,7 +134,15 @@ def print_info():
     y += font.getsize(MemUsage)[1]
     draw.text((x, y), Disk, font=font, fill="#0000FF")
     y += font.getsize(Disk)[1]
-#    draw.text((x, y), Temp, font=font, fill="#FF00FF")
+    draw.text((x, y), Temp, font=font, fill="#FF00FF")
+
+    cmd = "uptime -p"
+    args = shlex.split(cmd)
+    p = subprocess.Popen(args, stdout=subprocess.PIPE)
+    uptime = "Uptime: " + str(p.communicate())[5:15]
+
+    y += font.getsize(Temp)[1]
+    draw.text((x, y), uptime, font=font, fill="#FF00FF")
 
     # Display image.
     disp.image(image, rotation)
