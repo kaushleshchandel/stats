@@ -22,3 +22,29 @@ NumPy Library
 A recent improvement of the RGB_Display library makes use of NumPy for some additional speed. This can be installed with the following command:
 
 ```sudo apt-get install python3-numpy```
+
+Setup startup 
+
+create a file named app.sh
+
+```sudo nano app.sh```
+
+
+cd /
+cd home/pi
+sudo python app.py
+cd /
+
+
+```sudo chmod 755 app.sh```
+
+Log direectory
+
+```
+mkdir logs
+sudo crontab -e
+```
+
+Add to the end of file
+
+@reboot sh /home/pi/app.sh >/home/pi/logs/cronlog 2>&1
