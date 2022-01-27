@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # GPIO 23,24
-#  ---------------
+#  ______________
+# |           ---|
 # | Reboot    |24|
-# |           ----
 # | Shutdown  |23|
-# |           ----
-# |              |
-# |---------------
+# |           ---|
+# |______________|
 # Two buttons connected to the GPIO 24 & 23. 
 # Screen displayes the stats
 # When Reboot button is pressed for more than 5 seconds, system reboots
