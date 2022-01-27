@@ -12,6 +12,7 @@
 # When Reboot button is pressed for more than 5 seconds, system reboots
 # When Reset button is pressed for more than 5 seconds, system Shuts down
 
+import shlex
 import time
 import subprocess
 import digitalio
