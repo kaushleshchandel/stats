@@ -82,6 +82,7 @@ x = 0
 # Alternatively load a TTF font.  Make sure the .ttf font file is in the
 # same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
+font0 = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 18)
 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
 font1 = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 32)
 # Turn on the backlight
@@ -122,28 +123,30 @@ def print_info():
     MemUsage = subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %d/%d GB  %s", $3,$2,$5}\''
     Disk = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    cmd = "cat /sys/class/thermal/thermal_zone0/temp |  awk '{printf \"CPU Temp: %.1f C\", $(NF-0) / 1000}'"  # pylin>    Temp = subprocess.check_output(cmd, shell=True).decode("utf-8")
+    cmd = "cat /sys/class/thermal/thermal_zone0/temp |  awk '{printf \"CPU Temp: %.1f C\", $(NF-0) / 1000}'"  
     Temp = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
     # Write four lines of text.
     y = top
+    draw.text((x, y), "** DEVICE NAME ***", font=font, fill="#FFFFFF")
+    y += font.getsize(IP)[1] + 10
     draw.text((x, y), IP, font=font, fill="#FFFFFF")
-    y += font.getsize(IP)[1]
+    y += font.getsize(IP)[1] + 4
     draw.text((x, y), CPU, font=font, fill="#FFFF00")
-    y += font.getsize(CPU)[1]
-    draw.text((x, y), MemUsage, font=font, fill="#00FF00")
-    y += font.getsize(MemUsage)[1]
-    draw.text((x, y), Disk, font=font, fill="#0000FF")
-    y += font.getsize(Disk)[1]
-    draw.text((x, y), Temp, font=font, fill="#FF00FF")
+    y += font.getsize(CPU)[1] + 4
+    draw.text((x, y), MemUsage, font=font0, fill="#00FF00")
+    y += font.getsize(MemUsage)[1] + 4
+    draw.text((x, y), Disk, font=font0, fill="#0000FF")
+    y += font.getsize(Disk)[1] + 4
+    draw.text((x, y), Temp, font=font0, fill="#FF00FF")
 
     cmd = "uptime -p"
     args = shlex.split(cmd)
     p = subprocess.Popen(args, stdout=subprocess.PIPE)
     uptime = "Uptime: " + str(p.communicate())[5:15]
 
-    y += font.getsize(Temp)[1]
-    draw.text((x, y), uptime, font=font, fill="#FF00FF")
+    y += font.getsize(Temp)[1] + 4
+    draw.text((x, y), uptime, font=font0, fill="#FF00FF")
 
     # Display image.
     disp.image(image, rotation)
