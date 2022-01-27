@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 # GPIO 23,24
-#  ______________
-# |           ---|
+#  ---------------
 # | Reboot    |24|
+# |           ----
 # | Shutdown  |23|
-# |           ---|
-# |______________|
-# Two buttons connected to the GPIO 24 & 23. 
+# |           ----
+# |              |
+# |---------------
+# Two buttons connected to the GPIO 24 & 23.
 # Screen displayes the stats
 # When Reboot button is pressed for more than 5 seconds, system reboots
 # When Reset button is pressed for more than 5 seconds, system Shuts down
-
 import shlex
 import time
 import subprocess
@@ -84,6 +84,7 @@ x = 0
 font0 = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 18)
 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
 font1 = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 32)
+
 # Turn on the backlight
 backlight = digitalio.DigitalInOut(board.D22)
 backlight.switch_to_output()
@@ -115,29 +116,30 @@ def print_info():
     # Shell scripts for system monitoring from here:
     # https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
     cmd = "hostname -I | cut -d' ' -f1"
-    IP = "IP: " + subprocess.check_output(cmd, shell=True).decode("utf-8")
+    IP = subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
     CPU = subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%s MB  %.2f%%\", $3,$2,$3*100/$2 }'"
     MemUsage = subprocess.check_output(cmd, shell=True).decode("utf-8")
     cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %d/%d GB  %s", $3,$2,$5}\''
     Disk = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    cmd = "cat /sys/class/thermal/thermal_zone0/temp |  awk '{printf \"CPU Temp: %.1f C\", $(NF-0) / 1000}'"  
+    cmd = "cat /sys/class/thermal/thermal_zone0/temp |  awk '{printf \"CPU Temp: %.1f C\", $(NF-0) / 1000}'"  # pylin>    Temp = subprocess.check_output(cmd, shell=True).decode("utf-8")
     Temp = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
     # Write four lines of text.
     y = top
-    draw.text((x, y), "** DEVICE NAME ***", font=font, fill="#FFFFFF")
+    draw.text((x, y), "***** VPN *****", font=font1, fill="#FFFFFF")
     y += font.getsize(IP)[1] + 10
-    draw.text((x, y), IP, font=font, fill="#FFFFFF")
-    y += font.getsize(IP)[1] + 4
+
+    draw.text((x, y), IP, font=font1, fill="#FFFFFF")
+    y += font.getsize(IP)[1] + 10
     draw.text((x, y), CPU, font=font, fill="#FFFF00")
     y += font.getsize(CPU)[1] + 4
-    draw.text((x, y), MemUsage, font=font0, fill="#00FF00")
-    y += font.getsize(MemUsage)[1] + 4
-    draw.text((x, y), Disk, font=font0, fill="#0000FF")
+    draw.text((x, y), MemUsage, font=font, fill="#00FF00")
+    y += font.getsize(MemUsage)[1]
+    draw.text((x, y), Disk, font=font, fill="#0000FF")
     y += font.getsize(Disk)[1] + 4
-    draw.text((x, y), Temp, font=font0, fill="#FF00FF")
+    draw.text((x, y), Temp, font=font, fill="#FF00FF")
 
     cmd = "uptime -p"
     args = shlex.split(cmd)
@@ -145,7 +147,7 @@ def print_info():
     uptime = "Uptime: " + str(p.communicate())[5:15]
 
     y += font.getsize(Temp)[1] + 4
-    draw.text((x, y), uptime, font=font0, fill="#FF00FF")
+    draw.text((x, y), uptime, font=font, fill="#FF00FF")
 
     # Display image.
     disp.image(image, rotation)
@@ -160,12 +162,12 @@ def print_shutdown_reboot(caption):
 
 
 while True:
-    
+
     # Check the buttons value if LOW or HIGH
     bs = GPIO.input(shutdown_pin)
     br = GPIO.input(reboot_pin)
 #    print(bs,br)
-    
+
     # If Shutdown button is pressed
     if bs == GPIO.LOW:
         counter = 0
