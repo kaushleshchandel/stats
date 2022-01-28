@@ -49,3 +49,16 @@ sudo crontab -e
 Add to the end of file
 
 @reboot sh /home/pi/app.sh >/home/pi/logs/cronlog 2>&1
+
+
+### Use this to monitor over MQTT
+
+https://github.com/Sennevds/system_sensors
+
+```
+git clone https://github.com/Sennevds/system_sensors.git
+cd system_sensors
+pip3 install -r requirements.txt
+sudo apt-get install python3-apt
+```
+Edit settings_example.yaml in "~/system_sensors/src" to reflect your setup and save as settings.yaml:
