@@ -2,7 +2,12 @@
 Instructions for LCD
 https://github.com/IOT-MCU/Mini-PiTFT-for-Raspberry-Pi/wiki/Usage
 
-```sudo apt-get install python3-pip```
+
+
+```
+sudo apt-get update
+
+sudo apt-get install python3-pip```
 
 ```sudo pip3 install adafruit-circuitpython-rgb-display```
 
