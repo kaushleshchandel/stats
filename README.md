@@ -2,17 +2,12 @@
 Instructions for LCD
 https://github.com/IOT-MCU/Mini-PiTFT-for-Raspberry-Pi/wiki/Usage
 
-
-
 ```
 sudo apt-get update
-
-sudo apt-get install python3-pip```
-
-```sudo pip3 install adafruit-circuitpython-rgb-display```
-
-```sudo pip3 install --upgrade --force-reinstall spidev```
-
+sudo apt-get install python3-pip
+sudo pip3 install adafruit-circuitpython-rgb-display
+sudo pip3 install --upgrade --force-reinstall spidev
+```
 
 DejaVu TTF Font
 Raspberry Pi usually comes with the DejaVu font already installed, but in case it didn't, you can run the following to install it:
